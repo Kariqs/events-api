@@ -18,7 +18,11 @@ func main() {
 }
 
 func getEvents(ctx *gin.Context) {
-	events := models.GetAllEvents()
+	client, context, cancel := models.DatabaseConnection()
+	defer cancel()
+	defer client.Disconnect(context)
+
+	events := models.GetAllEvents(client)
 	ctx.JSON(http.StatusOK, events)
 }
 

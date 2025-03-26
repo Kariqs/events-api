@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -33,6 +34,24 @@ func (event *Event) Save(client *mongo.Client) (*mongo.InsertOneResult, error) {
 	return result, nil
 }
 
-func GetAllEvents() []Event {
+func GetAllEvents(client *mongo.Client) []Event {
+	collection := client.Database("eventsdb").Collection("events")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cur, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var event Event
+		if err := cur.Decode(&event); err != nil {
+			log.Fatal(err)
+		}
+		
+		events = append(events, event)
+	}
 	return events
 }
