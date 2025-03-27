@@ -14,7 +14,6 @@ func getEvents(ctx *gin.Context) {
 	defer client.Disconnect(context)
 
 	events, err := models.GetAllEvents(client)
-
 	if err != nil {
 		ctx.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -55,4 +54,16 @@ func getEventById(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, event)
+}
+
+func deleteEvent(ctx *gin.Context) {
+	eventId := ctx.Param("eventId")
+	client, context, cancel := models.DatabaseConnection()
+	defer cancel()
+	defer client.Disconnect(context)
+	_, err := models.DeleteEventById(client, eventId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully."})
 }

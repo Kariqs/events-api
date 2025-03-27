@@ -81,3 +81,24 @@ func GetEventById(client *mongo.Client, eventId string) (map[string]any, error) 
 	}
 	return event, nil
 }
+
+func DeleteEventById(client *mongo.Client, eventId string) (*mongo.DeleteResult, error) {
+	collection := client.Database("eventsdb").Collection("events")
+
+	_, err := GetEventById(client, eventId)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	objectId, err := bson.ObjectIDFromHex(eventId)
+	if err != nil {
+		fmt.Println("Failed to parse ID")
+	}
+
+	deletedItem, err := collection.DeleteOne(context.TODO(), bson.D{{Key: "_id", Value: objectId}})
+	if err != nil {
+		fmt.Println("Error deleting event", err.Error())
+	}
+
+	return deletedItem, nil
+}
