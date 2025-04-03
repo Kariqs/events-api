@@ -14,5 +14,7 @@ func init() {
 
 func main() {
 	server := gin.Default()
-	routes.RegisterRoutes(server)
+	routes.RegisterUserRoutes(server)
+	routes.RegisterEventRoutes(server)
+	server.Run()
 }
